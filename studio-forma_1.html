@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Forma®</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--black:#0a0a0a;--white:#ffffff;--red:#e03020;--gray:#888;--light:#f5f4f0;--border:#e0ddd8}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--white);color:var(--black);overflow-x:hidden;font-size:14px;line-height:1.5;cursor:none}
+
+/* CUSTOM CURSOR */
+#cursor{position:fixed;width:10px;height:10px;background:var(--red);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s;mix-blend-mode:multiply}
+#cursor-ring{position:fixed;width:36px;height:36px;border:1.5px solid var(--red);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .12s ease,top .12s ease,width .2s,height .2s,opacity .2s;opacity:.5}
+body:hover #cursor-ring{opacity:.5}
+a,button,[onclick]{cursor:none}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-28px);transition:opacity .7s ease,transform .7s ease}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);z-index:100;transition:box-shadow .3s}
+nav.scrolled{box-shadow:0 1px 24px rgba(0,0,0,.06)}
+.nav-logo{font-size:13px;font-weight:600;letter-spacing:0.04em}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{font-size:12px;color:var(--gray);text-decoration:none;letter-spacing:0.02em;transition:color .15s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:var(--red);transition:width .25s}
+.nav-links a:hover{color:var(--black)}
+.nav-links a:hover::after{width:100%}
+.nav-cta{font-size:12px;font-weight:500;background:var(--black);color:var(--white);padding:8px 18px;border-radius:100px;text-decoration:none;transition:background .2s,transform .15s}
+.nav-cta:hover{background:var(--red);transform:scale(1.04)}
+@media(max-width:640px){.nav-links{display:none}}
+
+/* HERO */
+.hero{padding:60px 32px 0;display:grid;grid-template-columns:1fr 1fr;gap:40px;max-width:1200px;margin:0 auto}
+@media(max-width:768px){.hero{grid-template-columns:1fr;padding:40px 20px 0}}
+.hero-left h1{font-family:'DM Serif Display',serif;font-size:clamp(32px,4vw,52px);font-weight:400;line-height:1.1;max-width:420px;margin-bottom:32px}
+.hero-tags{display:flex;flex-direction:column;gap:8px;margin-bottom:32px}
+.hero-tag{font-size:11px;color:var(--gray);letter-spacing:0.08em;text-transform:uppercase}
+.hero-btn{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:var(--white);font-size:12px;font-weight:500;padding:10px 22px;border-radius:100px;text-decoration:none;transition:transform .2s,box-shadow .2s}
+.hero-btn:hover{transform:scale(1.05);box-shadow:0 8px 24px rgba(224,48,32,.35)}
+.hero-right{display:flex;flex-direction:column;gap:16px;padding-top:8px}
+.hero-right-text{font-size:13px;color:var(--gray);line-height:1.7;max-width:300px}
+.hero-right-links{display:flex;flex-direction:column;gap:6px}
+.hero-right-links a{font-size:12px;color:var(--black);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .15s,gap .2s}
+.hero-right-links a:hover{color:var(--red);gap:10px}
+.hero-right-links a::after{content:'↗';font-size:10px;color:var(--red)}
+
+/* HERO IMAGE */
+.hero-image{margin:40px 32px 0;position:relative;overflow:hidden;border-radius:12px}
+@media(max-width:640px){.hero-image{margin:32px 20px 0}}
+.hero-image img{width:100%;aspect-ratio:16/7;object-fit:cover;display:block;transform:scale(1.04);transition:transform 8s ease}
+.hero-image.loaded img{transform:scale(1)}
+.hero-image-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,rgba(0,0,0,.1) 60%);display:flex;align-items:flex-end;padding:32px}
+.hero-brand-wrap{display:flex;align-items:center;gap:16px}
+.hero-brand-text{font-family:'DM Serif Display',serif;font-size:clamp(36px,6vw,72px);color:var(--white);letter-spacing:-0.02em}
+@media(max-width:640px){.hero-image img{aspect-ratio:4/3}}
+
+/* SECTION */
+.section{padding:64px 32px}
+@media(max-width:640px){.section{padding:48px 20px}}
+.section-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:32px}
+.section-title{font-family:'DM Serif Display',serif;font-size:28px;font-weight:400}
+.section-link{font-size:12px;color:var(--red);text-decoration:none;display:flex;align-items:center;gap:4px;transition:gap .2s}
+.section-link:hover{gap:8px}
+.section-sub{font-size:12px;color:var(--gray);margin-top:4px;max-width:360px}
+
+/* CASES */
+.cases-grid{display:grid;gap:12px}
+.case-card{position:relative;overflow:hidden;border-radius:10px;cursor:pointer}
+.case-card img{width:100%;display:block;object-fit:cover;transition:transform .6s ease}
+.case-card:hover img{transform:scale(1.04)}
+.case-featured img{aspect-ratio:16/8}
+.case-half img{aspect-ratio:4/3}
+.case-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55) 0%,transparent 50%);opacity:0;transition:opacity .3s}
+.case-card:hover .case-overlay{opacity:1}
+.case-num{position:absolute;top:14px;right:14px;font-size:11px;color:rgba(255,255,255,.9);background:rgba(0,0,0,.4);padding:4px 10px;border-radius:100px;backdrop-filter:blur(4px)}
+.cases-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.cases-row{grid-template-columns:1fr}}
+.case-info{padding:14px 0}
+.case-name{font-size:15px;font-weight:500;margin-bottom:6px}
+.case-meta{display:flex;gap:6px;flex-wrap:wrap}
+.case-tag{font-size:10px;color:var(--gray);border:1px solid var(--border);padding:3px 10px;border-radius:100px;letter-spacing:0.04em}
+.case-desc{font-size:12px;color:var(--gray);margin-top:6px;line-height:1.6}
+
+/* SERVICES */
+.services{background:var(--white);padding:64px 32px;border-top:1px solid var(--border)}
+@media(max-width:640px){.services{padding:48px 20px}}
+.service-item{display:grid;grid-template-columns:1fr auto;align-items:center;padding:20px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:padding-left .2s}
+.service-item:first-child{border-top:1px solid var(--border)}
+.service-item:hover{padding-left:8px}
+.service-item:hover .service-name{color:var(--red)}
+.service-name{font-size:20px;font-weight:400;font-family:'DM Serif Display',serif;transition:color .2s}
+.service-desc{font-size:12px;color:var(--gray);max-width:340px;line-height:1.6;margin-top:6px}
+.service-arrow{font-size:18px;color:var(--red);transition:transform .25s}
+.service-item:hover .service-arrow{transform:translateX(6px)}
+
+/* ABOUT */
+.about-section{padding:80px 32px;background:var(--light);display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+@media(max-width:768px){.about-section{grid-template-columns:1fr;padding:48px 20px;gap:32px}}
+.about-label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--red);margin-bottom:16px}
+.about-heading{font-family:'DM Serif Display',serif;font-size:clamp(28px,3.5vw,44px);font-weight:400;line-height:1.15;margin-bottom:24px}
+.about-text{font-size:13px;color:var(--gray);line-height:1.75;margin-bottom:24px}
+.about-btn{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:var(--white);font-size:12px;font-weight:500;padding:10px 22px;border-radius:100px;border:none;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.about-btn:hover{transform:scale(1.05);box-shadow:0 8px 24px rgba(224,48,32,.3)}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.stat-item{padding:24px;background:var(--white);border-radius:12px;transition:transform .2s}
+.stat-item:hover{transform:translateY(-3px)}
+.stat-num{font-family:'DM Serif Display',serif;font-size:44px;font-weight:400;color:var(--black);line-height:1}
+.stat-suffix{font-size:24px;color:var(--red)}
+.stat-label{font-size:12px;color:var(--gray);margin-top:8px;line-height:1.5}
+
+/* ABOUT PHOTOS */
+.about-photos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.about-photo{border-radius:10px;overflow:hidden}
+.about-photo img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;transition:transform .5s}
+.about-photo:hover img{transform:scale(1.04)}
+.about-photo:first-child{margin-top:32px}
+
+/* PROCESS */
+.process{padding:80px 32px;border-top:1px solid var(--border)}
+@media(max-width:640px){.process{padding:48px 20px}}
+.process-header{margin-bottom:48px;max-width:600px}
+.process-heading{font-family:'DM Serif Display',serif;font-size:clamp(28px,3.5vw,44px);font-weight:400;line-height:1.15;margin-bottom:12px}
+.process-desc{font-size:13px;color:var(--gray);line-height:1.7}
+.process-step{display:grid;grid-template-columns:60px 1fr auto;align-items:center;padding:24px 0;border-bottom:1px solid var(--border);cursor:pointer;gap:24px;transition:padding-left .2s}
+.process-step:first-child{border-top:1px solid var(--border)}
+.process-step:hover{padding-left:8px}
+.step-num{font-size:11px;color:var(--gray);letter-spacing:0.06em}
+.step-name{font-size:18px;font-weight:400;font-family:'DM Serif Display',serif}
+.step-detail{font-size:12px;color:var(--gray);max-width:360px;line-height:1.6;margin-top:4px}
+.step-icon{font-size:16px;color:var(--gray);transition:transform .25s,color .2s}
+.process-step:hover .step-icon{transform:rotate(45deg);color:var(--red)}
+
+/* CTA */
+.cta-section{padding:80px 32px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;border-top:1px solid var(--border)}
+@media(max-width:768px){.cta-section{grid-template-columns:1fr;padding:48px 20px;gap:32px}}
+.cta-label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--red);margin-bottom:16px}
+.cta-heading{font-family:'DM Serif Display',serif;font-size:clamp(28px,3.5vw,44px);font-weight:400;line-height:1.15;margin-bottom:12px}
+.cta-sub{font-size:13px;color:var(--gray);line-height:1.7;margin-bottom:28px}
+.cta-form{display:flex;flex-direction:column;gap:12px}
+.cta-form input,.cta-form textarea{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;background:var(--white);transition:border-color .2s,box-shadow .2s;color:var(--black)}
+.cta-form input:focus,.cta-form textarea:focus{border-color:var(--black);box-shadow:0 0 0 3px rgba(10,10,10,.06)}
+.cta-form textarea{resize:vertical;min-height:100px}
+.cta-form button{background:var(--red);color:var(--white);font-size:13px;font-weight:500;padding:12px 28px;border-radius:100px;border:none;cursor:pointer;align-self:flex-start;transition:transform .2s,box-shadow .2s;font-family:'Inter',sans-serif}
+.cta-form button:hover{transform:scale(1.04);box-shadow:0 8px 24px rgba(224,48,32,.35)}
+.cta-photo{border-radius:16px;overflow:hidden;aspect-ratio:4/5}
+.cta-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}
+.cta-photo:hover img{transform:scale(1.03)}
+
+/* FOOTER */
+footer{background:var(--black);padding:48px 32px;display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:40px}
+@media(max-width:640px){footer{grid-template-columns:1fr;padding:40px 20px}}
+.footer-brand{font-family:'DM Serif Display',serif;font-size:clamp(36px,5vw,64px);color:var(--white);display:flex;align-items:center;gap:16px;opacity:.9}
+.footer-right{text-align:right}
+@media(max-width:640px){.footer-right{text-align:left}}
+.footer-links{display:flex;gap:20px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:16px}
+@media(max-width:640px){.footer-links{justify-content:flex-start}}
+.footer-links a{font-size:12px;color:rgba(255,255,255,.45);text-decoration:none;transition:color .15s}
+.footer-links a:hover{color:var(--white)}
+.footer-copy{font-size:11px;color:rgba(255,255,255,.3)}
+
+/* COUNTER ANIMATION */
+.count-num{display:inline-block}
+
+/* TOAST */
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--black);color:var(--white);font-size:13px;padding:12px 24px;border-radius:100px;opacity:0;transition:all .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PAGE LOAD */
+.page-loader{position:fixed;inset:0;background:var(--white);z-index:10000;display:flex;align-items:center;justify-content:center;transition:opacity .5s,visibility .5s}
+.page-loader.hidden{opacity:0;visibility:hidden}
+.loader-text{font-family:'DM Serif Display',serif;font-size:32px;animation:loaderPulse 1s ease infinite alternate}
+@keyframes loaderPulse{from{opacity:.3}to{opacity:1}}
+</style>
+</head>
+<body>
+
+<div class="page-loader" id="loader"><div class="loader-text">Studio Forma®</div></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">Studio Forma®</div>
+  <ul class="nav-links">
+    <li><a href="#cases">Work</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Get in touch</a>
+</nav>
+
+<!-- HERO -->
+<div style="max-width:1200px;margin:0 auto">
+  <div class="hero">
+    <div class="hero-left">
+      <h1 class="reveal">A Versatile Portfolio Website For Creative Studios & Independent Professionals</h1>
+      <div class="hero-tags reveal reveal-delay-1">
+        <span class="hero-tag">Brand Strategy</span>
+        <span class="hero-tag">Visual Identity</span>
+        <span class="hero-tag">Digital Experience</span>
+      </div>
+      <a href="#cases" class="hero-btn reveal reveal-delay-2">View Our Work →</a>
+    </div>
+    <div class="hero-right reveal-right">
+      <p class="hero-right-text">We craft distinctive visual identities and digital experiences for forward-thinking brands and studios.</p>
+      <div class="hero-right-links">
+        <a href="#services">Brand Architecture</a>
+        <a href="#services">Web Design & Development</a>
+        <a href="#services">Art Direction</a>
+        <a href="#services">Product & Packaging</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HERO IMAGE -->
+<div class="hero-image reveal" id="heroImg">
+  <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1600&q=80&fit=crop" alt="Studio hero" loading="eager">
+  <div class="hero-image-overlay">
+    <div class="hero-brand-wrap">
+      <svg width="44" height="44" viewBox="0 0 60 60" fill="none"><path d="M30 4L56 18V42L30 56L4 42V18L30 4Z" stroke="white" stroke-width="1.5" fill="none" opacity=".7"/><path d="M30 16L30 44M18 23L42 37M42 23L18 37" stroke="white" stroke-width="1" opacity=".4"/></svg>
+      <span class="hero-brand-text">Studio Name<sup style="font-size:.4em;vertical-align:super;opacity:.6">®</sup></span>
+    </div>
+  </div>
+</div>
+
+<!-- CASE STUDIES -->
+<div class="section" id="cases" style="max-width:1200px;margin:0 auto">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-title">Selected Case Studies</div>
+      <div class="section-sub">A curated collection of our most impactful work across industries</div>
+    </div>
+    <a href="#contact" class="section-link">Browse all →</a>
+  </div>
+
+  <div class="cases-grid">
+    <div class="reveal">
+      <div class="case-card case-featured">
+        <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&q=80&fit=crop" alt="Atelier Forma">
+        <div class="case-overlay"></div>
+        <div class="case-num">01 / 04</div>
+      </div>
+      <div class="case-info">
+        <div class="case-name">Atelier Forma</div>
+        <div class="case-meta">
+          <span class="case-tag">Brand Identity</span>
+          <span class="case-tag">Web Design</span>
+          <span class="case-tag">Art Direction</span>
+        </div>
+        <div class="case-desc">A complete visual identity system for a contemporary fashion atelier, spanning logo, typography, and digital presence.</div>
+      </div>
+    </div>
+
+    <div class="cases-row">
+      <div class="reveal reveal-delay-1">
+        <div class="case-card case-half">
+          <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80&fit=crop" alt="Field Notes">
+          <div class="case-overlay"></div>
+          <div class="case-num">02 / 04</div>
+        </div>
+        <div class="case-info">
+          <div class="case-name">Field Notes</div>
+          <div class="case-meta"><span class="case-tag">Editorial</span><span class="case-tag">Print</span></div>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <div class="case-card case-half">
+          <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&q=80&fit=crop" alt="Noma House">
+          <div class="case-overlay"></div>
+          <div class="case-num">03 / 04</div>
+        </div>
+        <div class="case-info">
+          <div class="case-name">Noma House</div>
+          <div class="case-meta"><span class="case-tag">Identity</span><span class="case-tag">Packaging</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cases-row">
+      <div class="reveal reveal-delay-1">
+        <div class="case-card case-half">
+          <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80&fit=crop" alt="Meridian">
+          <div class="case-overlay"></div>
+          <div class="case-num">04 / 05</div>
+        </div>
+        <div class="case-info">
+          <div class="case-name">Meridian</div>
+          <div class="case-meta"><span class="case-tag">Product Design</span><span class="case-tag">3D</span></div>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <div class="case-card case-half">
+          <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=800&q=80&fit=crop" alt="Veil">
+          <div class="case-overlay"></div>
+          <div class="case-num">05 / 05</div>
+        </div>
+        <div class="case-info">
+          <div class="case-name">Veil</div>
+          <div class="case-meta"><span class="case-tag">Fashion</span><span class="case-tag">Campaign</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<div class="services" id="services" style="max-width:1200px;margin:0 auto;border-top:1px solid var(--border)">
+  <div class="section-header reveal" style="margin-bottom:0">
+    <div class="section-title">What We Do</div>
+  </div>
+  <div style="margin-top:0">
+    <div class="service-item reveal"><div><div class="service-name">Brand Architecture</div><div class="service-desc">Structuring your brand portfolio for clarity, differentiation, and long-term growth.</div></div><div class="service-arrow">→</div></div>
+    <div class="service-item reveal reveal-delay-1"><div><div class="service-name">Web Design & Development</div><div class="service-desc">Custom digital experiences that communicate your brand's unique value with precision.</div></div><div class="service-arrow">→</div></div>
+    <div class="service-item reveal reveal-delay-2"><div><div class="service-name">Art Direction</div><div class="service-desc">Creative leadership across photography, film, and visual content that captures your brand's essence.</div></div><div class="service-arrow">→</div></div>
+    <div class="service-item reveal reveal-delay-3"><div><div class="service-name">Product & Packaging Design</div><div class="service-desc">Thoughtful packaging solutions that stand out at the point of sale and create lasting impressions.</div></div><div class="service-arrow">→</div></div>
+    <div class="service-item reveal reveal-delay-4"><div><div class="service-name">Content Production</div><div class="service-desc">End-to-end content creation — from strategy to final delivery — that resonates with your audience.</div></div><div class="service-arrow">→</div></div>
+    <div class="service-item reveal"><div><div class="service-name">Integrated Campaigns</div><div class="service-desc">Multi-channel campaigns that build brand equity and drive measurable results.</div></div><div class="service-arrow">→</div></div>
+  </div>
+</div>
+
+<!-- ABOUT / STATS -->
+<div class="about-section" id="about">
+  <div class="reveal-left">
+    <div class="about-label">About Studio</div>
+    <h2 class="about-heading">We Help Brands And Businesses Create Clarity And Consistency</h2>
+    <p class="about-text">From first conversation to final delivery, we partner with ambitious brands to craft distinctive visual identities and digital experiences that stand the test of time.</p>
+    <a href="#contact" class="about-btn">Start a Project →</a>
+  </div>
+  <div class="about-photos reveal-right">
+    <div class="about-photo">
+      <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80&fit=crop" alt="Team">
+    </div>
+    <div class="about-photo">
+      <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80&fit=crop" alt="Work">
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div style="background:var(--white);padding:64px 32px;border-top:1px solid var(--border)">
+  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px" class="reveal">
+    <div class="stat-item">
+      <div class="stat-num"><span class="count-num" data-target="90">0</span><span class="stat-suffix">%</span></div>
+      <div class="stat-label">Client satisfaction rate across all completed projects</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span class="count-num" data-target="60">0</span><span class="stat-suffix">+</span></div>
+      <div class="stat-label">Brands launched and rebranded since founding</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span class="count-num" data-target="10">0</span><span class="stat-suffix">+</span></div>
+      <div class="stat-label">Years of combined creative and strategic experience</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span class="count-num" data-target="30">0</span><span class="stat-suffix"></span></div>
+      <div class="stat-label">Industry awards and recognitions received</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROCESS -->
+<div class="process" id="process" style="max-width:1200px;margin:0 auto">
+  <div class="process-header reveal">
+    <div class="about-label">Our Process</div>
+    <h2 class="process-heading">From First Conversation To Final Delivery — Four Simple Steps</h2>
+    <p class="process-desc">A clear, collaborative approach designed to deliver exceptional results on time and on brief.</p>
+  </div>
+  <div>
+    <div class="process-step reveal"><span class="step-num">01</span><div><div class="step-name">Discovery</div><div class="step-detail">We immerse ourselves in your world — understanding your brand, audience, competitors, and goals before a single concept is sketched.</div></div><span class="step-icon">+</span></div>
+    <div class="process-step reveal reveal-delay-1"><span class="step-num">02</span><div><div class="step-name">Production</div><div class="step-detail">Our creative team translates strategy into distinctive visual language — concepts, design systems, and content that captures your essence.</div></div><span class="step-icon">+</span></div>
+    <div class="process-step reveal reveal-delay-2"><span class="step-num">03</span><div><div class="step-name">Post-Production</div><div class="step-detail">Every detail is refined and polished. We fine-tune, test, and iterate until the work meets our exacting standards.</div></div><span class="step-icon">+</span></div>
+    <div class="process-step reveal reveal-delay-3"><span class="step-num">04</span><div><div class="step-name">Launch</div><div class="step-detail">We deliver all assets, provide handover documentation, and stay available to ensure a smooth and successful launch.</div></div><span class="step-icon">+</span></div>
+  </div>
+</div>
+
+<!-- CTA / CONTACT -->
+<div class="cta-section" id="contact" style="max-width:1200px;margin:0 auto">
+  <div class="reveal-left">
+    <div class="cta-label">Let's Talk</div>
+    <h2 class="cta-heading">Tell Us About Your Project And We Will Suggest The Right Starting Point</h2>
+    <p class="cta-sub">We work with a select number of clients at a time to ensure every project gets the attention it deserves.</p>
+    <div class="cta-form">
+      <input type="text" id="cf-name" placeholder="Your name">
+      <input type="email" id="cf-email" placeholder="Email address">
+      <textarea id="cf-msg" placeholder="Tell us about your project..."></textarea>
+      <button onclick="submitContact()">Send Message →</button>
+    </div>
+  </div>
+  <div class="cta-photo reveal-right">
+    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80&fit=crop" alt="Studio work">
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <svg width="40" height="40" viewBox="0 0 60 60" fill="none"><path d="M30 4L56 18V42L30 56L4 42V18L30 4Z" stroke="white" stroke-width="1.5" fill="none" opacity=".5"/><path d="M30 16L30 44M18 23L42 37M42 23L18 37" stroke="white" stroke-width="1" opacity=".3"/></svg>
+    Studio Name<sup style="font-size:.35em;vertical-align:super;opacity:.5">®</sup>
+  </div>
+  <div class="footer-right">
+    <div class="footer-links">
+      <a href="#cases">Work</a><a href="#services">Services</a><a href="#process">Process</a><a href="#contact">Contact</a>
+    </div>
+    <div class="footer-copy">© 2024 Studio Forma. All rights reserved.</div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">Message sent! We'll be in touch soon. ✓</div>
+
+<script>
+// PAGE LOADER
+window.addEventListener('load',()=>{
+  setTimeout(()=>{document.getElementById('loader').classList.add('hidden')},600);
+  document.getElementById('heroImg').classList.add('loaded');
+});
+
+// CUSTOM CURSOR
+const cur=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+document.addEventListener('mousemove',e=>{
+  cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';
+  ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px';
+});
+document.querySelectorAll('a,button,[onclick]').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='56px';ring.style.height='56px';ring.style.opacity='.3';cur.style.transform='translate(-50%,-50%) scale(0.5)'});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.opacity='.5';cur.style.transform='translate(-50%,-50%) scale(1)'});
+});
+
+// SCROLL REVEAL
+const revealEls=document.querySelectorAll('.reveal,.reveal-left,.reveal-right');
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}})
+},{threshold:0.1});
+revealEls.forEach(el=>observer.observe(el));
+
+// NAV SCROLL
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>40);
+});
+
+// COUNTER ANIMATION
+const counters=document.querySelectorAll('.count-num');
+const cObserver=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const el=e.target;
+      const target=+el.dataset.target;
+      let cur=0;
+      const step=target/60;
+      const timer=setInterval(()=>{
+        cur+=step;
+        if(cur>=target){cur=target;clearInterval(timer);}
+        el.textContent=Math.round(cur);
+      },16);
+      cObserver.unobserve(el);
+    }
+  });
+},{threshold:0.5});
+counters.forEach(c=>cObserver.observe(c));
+
+// FORM
+function submitContact(){
+  const n=document.getElementById('cf-name').value.trim();
+  const e=document.getElementById('cf-email').value.trim();
+  if(!n||!e){alert('Please fill in your name and email.');return;}
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+  document.getElementById('cf-name').value='';
+  document.getElementById('cf-email').value='';
+  document.getElementById('cf-msg').value='';
+}
+</script>
+</body>
+</html>
